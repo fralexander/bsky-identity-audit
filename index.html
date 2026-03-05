@@ -1,9 +1,8 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bluesky Identity Audit - Seasonal Edition</title>
+  <title>Bluesky 6 Months Audit</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -15,28 +14,27 @@
     .setup-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 320px; }
     input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 15px; box-sizing: border-box; text-align: center; outline: none; }
     button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #0085ff; color: white; font-weight: 600; cursor: pointer; }
-    
     #loading { display: none; margin-top: 15px; font-size: 0.8rem; color: #0085ff; font-weight: 600; }
-
-    #auditCard {
-      display: none; width: 440px; border-radius: 25px;
-      background: white; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      overflow: hidden; 
+    
+    #auditCard { display: none; width: 440px; border-radius: 25px; background: white; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+    .card-header { background: #0085ff; color: white; padding: 25px 20px; text-align: center; transition: background 0.5s ease; }
+    .user-handle { font-size: 1.2rem; font-weight: 700; display: block; margin-top: 5px; }
+    .audit-date { font-size: 0.6rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+    
+    .soul-persona { 
+      font-size: 0.75rem; font-weight: 700; background: rgba(255,255,255,0.25); 
+      padding: 6px 18px; border-radius: 20px; display: inline-block; margin-top: 12px; 
+      text-transform: uppercase; letter-spacing: 2px; border: 1px solid rgba(255,255,255,0.4);
     }
-    .card-header { background: #0085ff; color: white; padding: 20px; text-align: center; }
-    .user-handle { font-size: 1.2rem; font-weight: 700; display: block; }
-    .audit-date { font-size: 0.65rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
 
     .content { padding: 15px 20px 10px 20px; }
     .data-row { display: flex; align-items: center; margin-bottom: 12px; background: #f8fafd; padding: 12px; border-radius: 18px; border: 1px solid #edf2f7; }
     .text-group { flex-grow: 1; display: flex; flex-direction: column; }
-    .label { font-size: 0.55rem; font-weight: 700; color: #0085ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
-    
+    .label { font-size: 0.55rem; font-weight: 700; color: #0085ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; transition: color 0.5s ease; }
     .value { font-size: 0.82rem; font-weight: 600; color: #2d3748; line-height: 1.3; }
     .sub-value { font-size: 0.65rem; color: #718096; margin-top: 4px; font-weight: 400; }
-
     .emoji-box { font-size: 1.8rem; margin-left: 15px; background: white; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-
+    
     .card-footer { padding: 0 20px 20px 20px; }
     .btn-download { background: #2d3748; width: 100%; padding: 12px; border-radius: 12px; color: white; border: none; font-family: 'Poppins'; font-weight: 600; cursor: pointer; }
   </style>
@@ -44,59 +42,25 @@
 <body>
 
   <div class="setup-card" id="setup">
-    <h2 style="margin-top:0">Identity Audit</h2>
+    <h2 style="margin-top:0">6 Months Audit</h2>
     <input type="text" id="handle" placeholder="username.bsky.social">
     <button onclick="runFullAudit()">Start Scanning</button>
-    <div id="loading">Analyzing last 6 months...</div>
+    <div id="loading">Scanning posts...</div>
   </div>
 
   <div id="auditCard">
-    <div class="card-header">
-      <span class="audit-date" id="displayDate">--/--/----</span>
+    <div class="card-header" id="cardHeader">
+      <span class="audit-date" id="displayDate">Audit Date: --/--/----</span>
       <span class="user-handle" id="displayHandle">@handle</span>
+      <div class="soul-persona" id="soulDisplay">Analysing...</div>
     </div>
 
     <div class="content">
-      <div class="data-row">
-        <div class="text-group">
-          <span class="label">Social Profile</span>
-          <span class="value" id="valProfile">---</span>
-          <span class="sub-value" id="subProfile">---</span>
-        </div>
-        <div class="emoji-box" id="emoProfile">❔</div>
-      </div>
-      <div class="data-row">
-        <div class="text-group">
-          <span class="label">Visual Impact (last 6 months)</span>
-          <span class="value" id="valVisual">---</span>
-          <span class="sub-value" id="subVisual">---</span>
-        </div>
-        <div class="emoji-box" id="emoVisual">❔</div>
-      </div>
-      <div class="data-row">
-        <div class="text-group">
-          <span class="label">Engagement Style (last 6 months)</span>
-          <span class="value" id="valInteraction">---</span>
-          <span class="sub-value" id="subInteraction">---</span>
-        </div>
-        <div class="emoji-box" id="emoInteraction">❔</div>
-      </div>
-      <div class="data-row">
-        <div class="text-group">
-          <span class="label">Activity Level (last 6 months)</span>
-          <span class="value" id="valActivity">---</span>
-          <span class="sub-value" id="subActivity">---</span>
-        </div>
-        <div class="emoji-box" id="emoActivity">❔</div>
-      </div>
-      <div class="data-row">
-        <div class="text-group">
-          <span class="label">Account Life</span>
-          <span class="value" id="valAge">---</span>
-          <span class="sub-value" id="subAge">---</span>
-        </div>
-        <div class="emoji-box" id="emoAge">❔</div>
-      </div>
+      <div class="data-row"><div class="text-group"><span class="label dynamic-color">Social Profile</span><span class="value" id="valProfile">---</span><span class="sub-value" id="subProfile">---</span></div><div class="emoji-box" id="emoProfile">❔</div></div>
+      <div class="data-row"><div class="text-group"><span class="label dynamic-color" id="lblVisual">Visual Impact</span><span class="value" id="valVisual">---</span><span class="sub-value" id="subVisual">---</span></div><div class="emoji-box" id="emoVisual">❔</div></div>
+      <div class="data-row"><div class="text-group"><span class="label dynamic-color" id="lblInteraction">Engagement Style</span><span class="value" id="valInteraction">---</span><span class="sub-value" id="subInteraction">---</span></div><div class="emoji-box" id="emoInteraction">❔</div></div>
+      <div class="data-row"><div class="text-group"><span class="label dynamic-color" id="lblActivity">Activity Level</span><span class="value" id="valActivity">---</span><span class="sub-value" id="subActivity">---</span></div><div class="emoji-box" id="emoActivity">❔</div></div>
+      <div class="data-row"><div class="text-group"><span class="label dynamic-color">Account Life</span><span class="value" id="valAge">---</span><span class="sub-value" id="subAge">---</span></div><div class="emoji-box" id="emoAge">❔</div></div>
     </div>
 
     <div class="card-footer">
@@ -110,127 +74,198 @@
       let handle = document.getElementById('handle').value.trim().replace('@', '');
       if(!handle) return;
       if(!handle.includes('.')) handle += '.bsky.social';
+      const loadingEl = document.getElementById('loading');
+      loadingEl.style.display = 'block';
 
-      document.getElementById('loading').style.display = 'block';
+try {
+    const profileResp = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${handle}`);
+    const profile = await profileResp.json();
+    const did = profile.did;
+    const created = new Date(profile.createdAt);
+    const now = new Date();
+    
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setDate(now.getDate() - 180); 
+    
+    let allMediaCount = 0, replyCount = 0, ownPostsInScan = 0;
+    let cursor = null;
+    let reachedEndOfTimeframe = false;
+    
+    console.log("🛠️ Système de scan activé");
+    console.log("📅 Aujourd'hui : " + now.toLocaleDateString());
+    console.log("📅 Recherche jusqu'au : " + sixMonthsAgo.toLocaleDateString());
 
-      try {
-        const profileResp = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${handle}`);
-        const profile = await profileResp.json();
-        const did = profile.did;
-        const totalPostsCount = profile.postsCount || 0;
-        const created = new Date(profile.createdAt);
-        
-        const now = new Date();
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(now.getMonth() - 6);
-        
-        let allMediaCount = 0, replyCount = 0, ownPostsCount = 0;
-        let cursor = null;
-        let reachedEndOfTimeframe = false;
-
-        while (!reachedEndOfTimeframe) {
+    while (!reachedEndOfTimeframe) {
           const url = `https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${did}&limit=100${cursor ? `&cursor=${cursor}` : ''}`;
           const resp = await fetch(url);
           const data = await resp.json();
+          
           if (!data.feed || data.feed.length === 0) break;
+
+          console.log(`📡 Analyse d'une page de ${data.feed.length} posts...`);
 
           for (const item of data.feed) {
             const p = item.post;
             const postDate = new Date(p.indexedAt);
-
-            if (postDate < sixMonthsAgo) {
-              reachedEndOfTimeframe = true;
-              break;
+            
+            if (postDate < sixMonthsAgo) { 
+                continue; 
             }
-
+            
             if (p.author.did === did && !item.reason) {
-              ownPostsCount++;
-              if (item.reply) replyCount++;
-              const hasMedia = p.embed && (p.embed.$type.includes('images') || p.embed.$type.includes('video'));
-              if (hasMedia && !item.reply) allMediaCount++;
-            }
-          }
+                ownPostsInScan++;
+                if (item.reply) replyCount++;
 
-          cursor = data.cursor;
-          document.getElementById('loading').textContent = `Scanning: ${ownPostsCount} recent posts...`;
-          if (!cursor) break;
+                if (p.embed) {
+                    const type = p.embed.$type || "";
+                    let isOriginalMedia = false;
+                    let mediaUrl = `https://bsky.app/profile/${handle}/post/${p.uri.split('/').pop()}`;
+
+                    if (type.includes('app.bsky.embed.images')) {
+                        const images = p.embed.images || [];
+                        isOriginalMedia = images.some(img => {
+                            const alt = (img.alt || "").toUpperCase();
+                            return (img.image?.mimeType || "") !== 'image/gif' && alt !== 'GIF';
+                        });
+                        if (isOriginalMedia) console.log(`📸 [IMAGE] Trouvée : ${mediaUrl}`);
+                    } 
+                    else if (type.includes('app.bsky.embed.video')) {
+                        isOriginalMedia = true;
+                        console.log(`🎥 [VIDEO] Trouvée : ${mediaUrl}`);
+                    }
+                    else if (type.includes('app.bsky.embed.recordWithMedia')) {
+                        const mediaType = p.embed.media?.$type || "";
+                        if (mediaType.includes('images') || mediaType.includes('video')) {
+                            isOriginalMedia = true;
+                            console.log(`🖼️ [QUOTE+MEDIA] Trouvé : ${mediaUrl}`);
+                        }
+                    }
+
+                    if (isOriginalMedia) {
+                        allMediaCount++;
+                    }
+                }
+            }
         }
 
-        const scanDays = Math.min(180, Math.max(1, Math.floor((now - created) / (1000 * 60 * 60 * 24))));
+        if (data.cursor) {
+            cursor = data.cursor;
+            console.log("➡️ Passage à la page suivante pour trouver plus de photos...");
+            
+            const lastPostInPage = new Date(data.feed[data.feed.length - 1].post.indexedAt);
+            if (lastPostInPage < sixMonthsAgo) {
+                console.log("🏁 Date limite atteinte en fin de page. Scan terminé.");
+                reachedEndOfTimeframe = true;
+            }
+        } else {
+            break; 
+        }
         
+        if (loadingEl) loadingEl.textContent = `Scanning: ${ownPostsInScan} posts...`;
+    }
+
+        const scanDaysEff = Math.min(180, Math.max(1, Math.floor((now - created) / (1000 * 60 * 60 * 24))));
+        const timeframeLabel = scanDaysEff >= 180 ? "last 6 months" : "since joining";
+        const scanWeeksEff = scanDaysEff / 7;
+        const dailyRate = (ownPostsInScan / scanDaysEff);
+        const imgPerWeek = (allMediaCount / scanWeeksEff);
+        const replyRatio = (replyCount / Math.max(1, ownPostsInScan)) * 100;
         let netRatio = profile.followersCount / (profile.followsCount || 1);
+
+        let soul;
+        if (dailyRate > 5 && imgPerWeek > 15) soul = "The Dragon";
+        else if (netRatio > 1.5 && replyRatio > 60) soul = "The Hydra";
+        else if (dailyRate > 15 && replyRatio > 60) soul = "The Phoenix";
+        else if (imgPerWeek > 5 && dailyRate < 5) soul = "The Unicorn";
+        else if (dailyRate < 1.5 && replyRatio < 40) soul = "The Kraken";
+        else if (netRatio > 1.5 && dailyRate < 5) soul = "The Griffin";
+        else if (dailyRate > 15 && replyRatio < 40) soul = "The Chimera";
+        else soul = "The Pegasus";
+
+        const creatureThemes = {
+          "The Dragon": "#e63946", "The Hydra": "#2a9d8f", "The Phoenix": "#f4a261", 
+          "The Unicorn": "#a29bfe", "The Kraken": "#264653", "The Griffin": "#d4af37", 
+          "The Chimera": "#6d597a", "The Pegasus": "#0085ff"
+        };
+        const activeColor = creatureThemes[soul];
+        document.getElementById('cardHeader').style.backgroundColor = activeColor;
+        document.querySelectorAll('.dynamic-color').forEach(el => el.style.color = activeColor);
+
+        document.getElementById('lblVisual').textContent = `Visual Impact (${timeframeLabel})`;
+        document.getElementById('lblInteraction').textContent = `Engagement Style (${timeframeLabel})`;
+        document.getElementById('lblActivity').textContent = `Activity Level (${timeframeLabel})`;
+
         let net, netEmo;
-        if (netRatio > 5) { net = "The Lion<br>A massive social reach."; netEmo = "🦁"; }
-        else if (netRatio > 1.5) { net = "The Peacock<br>Admired by many followers."; netEmo = "🦚"; }
-        else if (netRatio > 0.7) { net = "The Penguin<br>A perfectly balanced network."; netEmo = "🐧"; }
-        else if (netRatio > 0.2) { net = "The Bee<br>Busy visiting many accounts."; netEmo = "🐝"; }
-        else { net = "The Butterfly<br>An avid explorer of others."; netEmo = "🦋"; }
+        if (netRatio > 5) { net = "The Lion<br>Massive social reach."; netEmo = "🦁"; }
+        else if (netRatio > 1.5) { net = "The Peacock<br>Highly admired profile."; netEmo = "🦚"; }
+        else if (netRatio > 0.8) { net = "The Penguin<br>Perfectly balanced network."; netEmo = "🐧"; }
+        else if (netRatio > 0.3) { net = "The Bee<br>Active community member."; netEmo = "🐝"; }
+        else { net = "The Butterfly<br>Avid explorer of others."; netEmo = "🦋"; }
 
-        const imgPerWeek = (allMediaCount / (scanDays / 7));
         let vis, visEmo;
-        if (imgPerWeek > 10) { vis = "The Kingfisher<br>A non-stop visual gallery."; visEmo = "📸"; }
-        else if (imgPerWeek > 4) { vis = "The Fox<br>Shares media on a daily basis."; visEmo = "🦊"; }
-        else if (imgPerWeek > 1) { vis = "The Panda<br>A balanced mix of content."; visEmo = "🐼"; }
-        else if (allMediaCount > 5) { vis = "The Turtle<br>Shares media only occasionally."; visEmo = "🐢"; }
-        else { vis = "The Owl<br>A wisdom through text feed."; visEmo = "🦉"; }
+        if (imgPerWeek > 13.9) { vis = "The Kingfisher<br>A non-stop visual gallery."; visEmo = "🐦"; }
+        else if (imgPerWeek > 6.9) { vis = "The Fox<br>Sharp and frequent visuals."; visEmo = "🦊"; }
+        else if (imgPerWeek > 3.4) { vis = "The Panda<br>Balanced mix of content."; visEmo = "🐼"; }
+        else if (imgPerWeek > 1) { vis = "The Turtle<br>Rare but curated media."; visEmo = "🐢"; }
+        else { vis = "The Owl<br>Wisdom who rarely post media."; visEmo = "🦉"; }
 
-        const replyRatio = (replyCount / Math.max(1, ownPostsCount)) * 100;
         let int, intEmo;
-        if (replyRatio > 75) { int = "The Parrot<br>Lives for conversation."; intEmo = "🦜"; }
-        else if (replyRatio > 45) { int = "The Dolphin<br>Highly conversational."; intEmo = "🐬"; }
-        else if (replyRatio > 20) { int = "The Retriever<br>Balances posts and replies."; intEmo = "🐕"; }
-        else if (replyRatio > 5) { int = "The Eagle<br>Broadcasts original thoughts."; intEmo = "🦅"; }
-        else { int = "The Polar Bear<br>Rarely interacts with others."; intEmo = "🐻‍❄️"; }
+        if (replyRatio > 85) { int = "The Parrot<br>Lives for the conversation."; intEmo = "🦜"; }
+        else if (replyRatio > 60) { int = "The Dolphin<br>Deeply social nature."; intEmo = "🐬"; }
+        else if (replyRatio > 40) { int = "The Retriever<br>Social and original mix."; intEmo = "🐕"; }
+        else if (replyRatio > 15) { int = "The Eagle<br>Reply only when necessary"; intEmo = "🦅"; }
+        else if (replyRatio > 5) { int = "The Polar Bear<br>BEARly reply."; intEmo = "🐻‍❄️"; }
+		else { int = "The Ghost<br>Who?"; intEmo = "👻"; }
 
-        const dailyRate = (ownPostsCount / scanDays);
         let act, actEmo;
-        if (dailyRate > 15) { act = "The Squirrel<br>Hyper-active every single day."; actEmo = "🐿️"; }
-        else if (dailyRate > 5) { act = "The Cheetah<br>Strong daily presence."; actEmo = "🐆"; }
-        else if (dailyRate > 1) { act = "The Horse<br>Moderate and steady pace."; actEmo = "🐎"; }
-        else if (dailyRate > 0.1) { act = "The Deer<br>A quiet and discreet observer."; actEmo = "🦌"; }
-        else { act = "The Chameleon<br>Posts very sporadically."; actEmo = "🦎"; }
+        if (dailyRate > 45) { act = "The Squirrel<br>Hyper-active energy."; actEmo = "🐿️"; }
+        else if (dailyRate > 15) { act = "The Cheetah<br>Fast and frequent presence."; actEmo = "🐆"; }
+        else if (dailyRate > 5) { act = "The Horse<br>Steady and reliable pace."; actEmo = "🐎"; }
+        else if (dailyRate > 0.5) { act = "The Deer<br>Quietly observing the feed."; actEmo = "🦌"; }
+        else { act = "The Chameleon<br>Blends into the shadows."; actEmo = "🦎"; }
 
-        let years = now.getFullYear() - created.getFullYear();
-        let months = now.getMonth() - created.getMonth();
-        if (months < 0) { years--; months += 12; }
+        let ageYears = now.getFullYear() - created.getFullYear();
+        let ageMonths = now.getMonth() - created.getMonth();
+        let ageDays = now.getDate() - created.getDate();
+        if (ageDays < 0) { ageMonths--; let lastM = new Date(now.getFullYear(), now.getMonth(), 0); ageDays += lastM.getDate(); }
+        if (ageMonths < 0) { ageYears--; ageMonths += 12; }
+        let totalMonths = (ageYears * 12) + ageMonths;
         let ageLabel, ageEmo;
-        if (years >= 5) { ageLabel = "The Dinosaur<br>A legendary ancient soul."; ageEmo = "🦖"; }
-        else if (years >= 3) { ageLabel = "The Elephant<br>A long-time veteran."; ageEmo = "🐘"; }
-        else if (years >= 1) { ageLabel = "The Whale<br>Deeply rooted member."; ageEmo = "🐋"; }
-        else { ageLabel = "The Chick<br>Recently joined the habitat."; ageEmo = "🐣"; }
-        
-        let ageParts = [];
-        if (years > 0) ageParts.push(`${years} ${years > 1 ? 'years' : 'year'}`);
-        if (months > 0) ageParts.push(`${months} ${months > 1 ? 'months' : 'month'}`);
-        const ageFullStr = ageParts.length === 0 ? "less than a month" : ageParts.join(' and ');
+        if (ageYears >= 5) { ageLabel = "The Dinosaur<br>Legendary status, saw it all."; ageEmo = "🦖"; }
+        else if (ageYears >= 3) { ageLabel = "The Old Wolf<br>A wise elder of the pack."; ageEmo = "🐺"; }
+        else if (ageYears >= 1) { ageLabel = "The Swan<br>Graceful and established presence."; ageEmo = "🦢"; }
+        else if (totalMonths >= 6) { ageLabel = "The Hen<br>Established inhabitant."; ageEmo = "🐔"; }
+        else { ageLabel = "The Chick<br>Freshly hatched on Bluesky."; ageEmo = "🐣"; }
 
-        document.getElementById('displayDate').textContent = "Identity Audit: " + new Date().toLocaleDateString();
+        document.getElementById('displayDate').textContent = "Audit Date: " + now.toLocaleDateString();
         document.getElementById('displayHandle').textContent = "@" + profile.handle;
-        
+        document.getElementById('soulDisplay').textContent = soul;
+
         document.getElementById('valProfile').innerHTML = net;
         document.getElementById('subProfile').textContent = `${profile.followersCount} followers / ${profile.followsCount} following`;
         document.getElementById('emoProfile').textContent = netEmo;
 
         document.getElementById('valVisual').innerHTML = vis;
-        document.getElementById('subVisual').textContent = `${allMediaCount} media (${imgPerWeek.toFixed(1)}/week)`;
+        document.getElementById('subVisual').textContent = `${allMediaCount} photos/videos (${imgPerWeek.toFixed(1)}/week)`;
         document.getElementById('emoVisual').textContent = visEmo;
 
         document.getElementById('valInteraction').innerHTML = int;
-        document.getElementById('subInteraction').textContent = `${Math.round(replyRatio)}% of recent activity are replies`;
+        document.getElementById('subInteraction').textContent = `${Math.round(replyRatio)}% of posts are replies`;
         document.getElementById('emoInteraction').textContent = intEmo;
 
         document.getElementById('valActivity').innerHTML = act;
-        document.getElementById('subActivity').textContent = `${ownPostsCount} posts (${dailyRate.toFixed(1)}/day)`;
+        document.getElementById('subActivity').textContent = `${ownPostsInScan} posts (${dailyRate.toFixed(1)}/day)`;
         document.getElementById('emoActivity').textContent = actEmo;
 
+        let ageParts = []; if (ageYears > 0) ageParts.push(`${ageYears}y`); if (ageMonths > 0) ageParts.push(`${ageMonths}m`); ageParts.push(`${ageDays}d`);
         document.getElementById('valAge').innerHTML = ageLabel;
-        document.getElementById('subAge').textContent = `This user joined ${ageFullStr} ago.`;
+        document.getElementById('subAge').textContent = `Joined ${ageParts.join(' ')} ago`;
         document.getElementById('emoAge').textContent = ageEmo;
 
         document.getElementById('setup').style.display = 'none';
         document.getElementById('auditCard').style.display = 'block';
 
-      } catch (e) { alert("Error."); document.getElementById('loading').style.display = 'none'; }
+      } catch (e) { alert("Error."); loadingEl.style.display = 'none'; }
     }
 
     function saveCard() {
@@ -238,7 +273,7 @@
       btn.style.display = 'none';
       html2canvas(document.getElementById('auditCard'), { scale: 3, backgroundColor: "#ffffff" }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `BSKY_Audit_Seasonal.png`;
+        link.download = `BSKY_Audit.png`;
         link.href = canvas.toDataURL();
         link.click();
         btn.style.display = 'block';
