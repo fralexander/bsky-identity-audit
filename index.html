@@ -331,16 +331,25 @@ try {
     }
 
     function saveCard() {
-      const btn = document.getElementById('dlBtn');
-      btn.style.display = 'none';
-      html2canvas(document.getElementById('auditCard'), { scale: 3, backgroundColor: "#ffffff" }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `BSKY_Audit.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-        btn.style.display = 'block';
-      });
-    }
+  const card = document.getElementById('auditCard');
+  const btn = document.getElementById('dlBtn');
+
+  btn.style.display = 'none';
+
+  const captureHeight = card.querySelector('.content').getBoundingClientRect().bottom - card.getBoundingClientRect().top;
+
+  html2canvas(card, { 
+    scale: 3, 
+    backgroundColor: "#ffffff", 
+    height: captureHeight
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `BSKY_Audit.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    btn.style.display = 'block';
+  });
+}
   </script>
 </body>
 </html>
