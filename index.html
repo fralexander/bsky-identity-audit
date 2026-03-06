@@ -153,9 +153,9 @@ try {
     let cursor = null;
     let reachedEndOfTimeframe = false;
     
-    console.log("🛠️ Système de scan activé");
-    console.log("📅 Aujourd'hui : " + now.toLocaleDateString());
-    console.log("📅 Recherche jusqu'au : " + sixMonthsAgo.toLocaleDateString());
+    console.log("Scan on");
+    console.log("Aujourd'hui : " + now.toLocaleDateString());
+    console.log("Recherche jusqu'au : " + sixMonthsAgo.toLocaleDateString());
 
     while (!reachedEndOfTimeframe) {
           const url = `https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${did}&limit=100${cursor ? `&cursor=${cursor}` : ''}`;
@@ -164,7 +164,7 @@ try {
           
           if (!data.feed || data.feed.length === 0) break;
 
-          console.log(`📡 Analyse d'une page de ${data.feed.length} posts...`);
+          console.log(`Analyse page ${data.feed.length} posts...`);
 
           for (const item of data.feed) {
             const p = item.post;
@@ -189,17 +189,17 @@ try {
                             const alt = (img.alt || "").toUpperCase();
                             return (img.image?.mimeType || "") !== 'image/gif' && alt !== 'GIF';
                         });
-                        if (isOriginalMedia) console.log(`📸 [IMAGE] Trouvée : ${mediaUrl}`);
+                        if (isOriginalMedia) console.log(`IMAGE: ${mediaUrl}`);
                     } 
                     else if (type.includes('app.bsky.embed.video')) {
                         isOriginalMedia = true;
-                        console.log(`🎥 [VIDEO] Trouvée : ${mediaUrl}`);
+                        console.log(`VIDEO: ${mediaUrl}`);
                     }
                     else if (type.includes('app.bsky.embed.recordWithMedia')) {
                         const mediaType = p.embed.media?.$type || "";
                         if (mediaType.includes('images') || mediaType.includes('video')) {
                             isOriginalMedia = true;
-                            console.log(`🖼️ [QUOTE+MEDIA] Trouvé : ${mediaUrl}`);
+                            console.log(`QUOTE+MEDIA: ${mediaUrl}`);
                         }
                     }
 
@@ -212,11 +212,11 @@ try {
 
         if (data.cursor) {
             cursor = data.cursor;
-            console.log("➡️ Passage à la page suivante pour trouver plus de photos...");
+            console.log("Page suivante...");
             
             const lastPostInPage = new Date(data.feed[data.feed.length - 1].post.indexedAt);
             if (lastPostInPage < sixMonthsAgo) {
-                console.log("🏁 Date limite atteinte en fin de page. Scan terminé.");
+                console.log("Date limite fin de page. Scan terminé.");
                 reachedEndOfTimeframe = true;
             }
         } else {
