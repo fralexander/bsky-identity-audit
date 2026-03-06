@@ -68,7 +68,7 @@
     }
 
     .card-header { background: #0085ff; color: white; padding: 20px 20px; text-align: center; transition: background 0.5s ease; }
-    .user-handle { font-size: 1.3rem; font-weight: 700; display: block; margin-top: 5px; word-break: break-all; } /* Évite que les handles longs cassent le design */
+    .user-handle { font-size: 1.3rem; font-weight: 700; display: block; margin-top: 5px; word-break: break-all; }
     .audit-date { font-size: 0.65rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
     
     .soul-persona { 
@@ -269,13 +269,13 @@ try {
         else if (imgPerWeek > 6.9) { vis = "The Fox<br>Sharp and frequent visuals."; visEmo = "🦊"; }
         else if (imgPerWeek > 3.4) { vis = "The Panda<br>Balanced mix of content."; visEmo = "🐼"; }
         else if (imgPerWeek > 1) { vis = "The Turtle<br>Rare but curated media."; visEmo = "🐢"; }
-        else { vis = "The Owl<br>Wisdom who rarely post media."; visEmo = "🦉"; }
+        else { vis = "The Owl<br>Text-based wisdom."; visEmo = "🦉"; }
 
         let int, intEmo;
-        if (replyRatio > 85) { int = "The Parrot<br>Lives for the conversation."; intEmo = "🦜"; }
+        if (replyRatio > 85) { int = "The Parrot<br>Lives for conversation."; intEmo = "🦜"; }
         else if (replyRatio > 60) { int = "The Dolphin<br>Deeply social nature."; intEmo = "🐬"; }
         else if (replyRatio > 40) { int = "The Retriever<br>Social and original mix."; intEmo = "🐕"; }
-        else if (replyRatio > 15) { int = "The Eagle<br>Reply only when necessary"; intEmo = "🦅"; }
+        else if (replyRatio > 15) { int = "The Eagle<br>Reply when necessary."; intEmo = "🦅"; }
         else if (replyRatio > 5) { int = "The Polar Bear<br>BEARly reply."; intEmo = "🐻‍❄️"; }
 		else { int = "The Ghost<br>Who?"; intEmo = "👻"; }
 
@@ -293,9 +293,9 @@ try {
         if (ageMonths < 0) { ageYears--; ageMonths += 12; }
         let totalMonths = (ageYears * 12) + ageMonths;
         let ageLabel, ageEmo;
-        if (ageYears >= 5) { ageLabel = "The Dinosaur<br>Legendary status, saw it all."; ageEmo = "🦖"; }
-        else if (ageYears >= 3) { ageLabel = "The Old Wolf<br>A wise elder of the pack."; ageEmo = "🐺"; }
-        else if (ageYears >= 1) { ageLabel = "The Swan<br>Graceful and established presence."; ageEmo = "🦢"; }
+        if (ageYears >= 5) { ageLabel = "The Dinosaur<br>Saw it all."; ageEmo = "🦖"; }
+        else if (ageYears >= 3) { ageLabel = "The Old Wolf<br>Wise elder of the pack."; ageEmo = "🐺"; }
+        else if (ageYears >= 1) { ageLabel = "The Swan<br>Graceful and solid presence."; ageEmo = "🦢"; }
         else if (totalMonths >= 6) { ageLabel = "The Hen<br>Established inhabitant."; ageEmo = "🐔"; }
         else { ageLabel = "The Chick<br>Freshly hatched on Bluesky."; ageEmo = "🐣"; }
 
