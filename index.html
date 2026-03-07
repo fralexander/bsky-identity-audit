@@ -235,14 +235,14 @@ try {
         let netRatio = profile.followersCount / (profile.followsCount || 1);
 
         let soul;
-        if (dailyRate > 5 && imgPerWeek > 15) soul = "The Dragon";
-        else if (netRatio > 1.5 && replyRatio > 60) soul = "The Hydra";
-        else if (dailyRate > 15 && replyRatio > 60) soul = "The Phoenix";
-        else if (imgPerWeek > 5 && dailyRate < 5) soul = "The Unicorn";
-        else if (dailyRate < 1.5 && replyRatio < 40) soul = "The Kraken";
-        else if (netRatio > 1.5 && dailyRate < 5) soul = "The Griffin";
-        else if (dailyRate > 15 && replyRatio < 40) soul = "The Chimera";
-        else soul = "The Pegasus";
+
+		if (imgPerWeek > 12) soul = "The Dragon";
+		else if (dailyRate > 12) soul = (replyRatio > 50) ? "The Phoenix" : "The Chimera";
+		else if (netRatio > 1.8 && replyRatio > 65) soul = "The Hydra";
+		else if (netRatio > 1.5 && dailyRate < 4) soul = "The Griffin";
+		else if (imgPerWeek > 4 && dailyRate < 6) soul = "The Unicorn";
+		else if (dailyRate < 1.2 && replyRatio < 35) soul = "The Kraken";
+		else soul = "The Pegasus";
 
         const creatureThemes = {
           "The Dragon": "#e63946", "The Hydra": "#2a9d8f", "The Phoenix": "#f4a261", 
