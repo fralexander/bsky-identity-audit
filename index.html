@@ -140,8 +140,20 @@
       loadingEl.style.display = 'block';
 
 try {
-    const profileResp = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${handle}`);
+       const profileResp = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${handle}`);
+    
+    if (!profileResp.ok) {
+        if (loadingEl) loadingEl.textContent = "❌ Error: User not found. Check the handle.";
+        return;
+    }
+
     const profile = await profileResp.json();
+    
+    if (!profile || !profile.did) {
+        if (loadingEl) loadingEl.textContent = "❌ Error: Invalid profile data.";
+        return;
+    }
+
     const did = profile.did;
     const created = new Date(profile.createdAt);
     const now = new Date();
@@ -353,3 +365,4 @@ try {
   </script>
 </body>
 </html>
+
