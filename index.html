@@ -140,7 +140,7 @@
       loadingEl.style.display = 'block';
 
 try {
-       const profileResp = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${handle}`);
+    const profileResp = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${handle}`);
     
     if (!profileResp.ok) {
         if (loadingEl) loadingEl.textContent = "❌ Error: User not found. Check the handle.";
@@ -247,14 +247,23 @@ try {
         let netRatio = profile.followersCount / (profile.followsCount || 1);
 
         let soul;
-
-		if (imgPerWeek > 12) soul = "The Dragon";
-		else if (dailyRate > 12) soul = (replyRatio > 50) ? "The Phoenix" : "The Chimera";
-		else if (netRatio > 1.8 && replyRatio > 65) soul = "The Hydra";
-		else if (netRatio > 1.5 && dailyRate < 4) soul = "The Griffin";
-		else if (imgPerWeek > 4 && dailyRate < 6) soul = "The Unicorn";
-		else if (dailyRate < 1.2 && replyRatio < 35) soul = "The Kraken";
-		else soul = "The Pegasus";
+		
+		if (imgPerWeek > 12 && dailyRate > 12) 
+			soul = "The Dragon";
+		else if (dailyRate > 12 && replyRatio > 50) 
+			soul = "The Phoenix";
+		else if (dailyRate > 12 && replyRatio <= 50) 
+			soul = "The Chimera";
+		else if (netRatio > 1.8 && replyRatio > 65) 
+			soul = "The Hydra";
+		else if (netRatio > 1.5 && dailyRate < 4) 
+			soul = "The Griffin";
+		else if (imgPerWeek > 4 && dailyRate < 6) 
+			soul = "The Unicorn";
+		else if (dailyRate < 1.2 && replyRatio < 35) 
+			soul = "The Kraken";
+		else 
+			soul = "The Pegasus";
 
         const creatureThemes = {
           "The Dragon": "#e63946", "The Hydra": "#2a9d8f", "The Phoenix": "#f4a261", 
@@ -365,4 +374,3 @@ try {
   </script>
 </body>
 </html>
-
