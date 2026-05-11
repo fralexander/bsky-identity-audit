@@ -30,7 +30,7 @@
       box-sizing: border-box;
     }
 
-    input { 
+    input, select { 
       width: 100%; 
       padding: 14px; 
       border-radius: 12px; 
@@ -40,6 +40,7 @@
       text-align: center; 
       outline: none; 
       font-size: 1rem;
+      font-family: 'Poppins';
     }
 
     button { 
@@ -93,7 +94,6 @@
     
     .card-footer { padding: 0 20px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
     .btn-download { background: #2d3748; width: 100%; padding: 14px; border-radius: 12px; color: white; border: none; font-family: 'Poppins'; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
-    .btn-banner { background: #0085ff; }
 
     #bannerTemplate {
       display: none;
@@ -133,7 +133,6 @@
       padding: 35px 80px;
       border-radius: 100px;
       border: 2px solid rgba(255, 255, 255, 0.4);
-     
     }
 
     .banner-soul { 
@@ -178,7 +177,18 @@
     </div>
 
     <div class="card-footer">
-      <button class="btn-download" onclick="saveCard()" id="dlBtn">Download Card</button>
+	  <select id="creatureSelect" style="margin-top: 10px; margin-bottom: 0px;" onchange="updateUIFromSelect()">
+        <option value="Dragons">Dragons</option>
+        <option value="Hydras">Hydras</option>
+        <option value="Phoenixes">Phoenixes</option>
+        <option value="Unicorns">Unicorns</option>
+        <option value="Krakens">Krakens</option>
+        <option value="Griffins">Griffins</option>
+        <option value="Chimeras">Chimeras</option>
+        <option value="Pegasus">Pegasus</option>
+      </select>
+	  <button class="btn-download" onclick="saveCard()" id="dlBtn">Download Card</button>
+	  <button class="btn-download btn-avatar" onclick="saveAvatar()" id="dlAvatarBtn">Download Profile Pic</button>
       <button class="btn-download btn-banner" onclick="saveBanner()" id="dlBannerBtn">Download Banner</button>
     </div>
   </div>
@@ -195,9 +205,29 @@
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
+  
     let currentSoul = "";
     let currentHandle = "";
     let currentColor = "#0085ff";
+	let currentAvatarUrl = "";
+
+    const creatureThemes = {
+      "Dragons": "#e63946", "Hydras": "#2a9d8f", "Phoenixes": "#f4a261", 
+      "Unicorns": "#a29bfe", "Krakens": "#264653", "Griffins": "#d4af37", 
+      "Chimeras": "#6d597a", "Pegasus": "#0085ff"
+    };
+
+    function updateUIFromSelect() {
+      const selectedSoul = document.getElementById('creatureSelect').value;
+      const selectedColor = creatureThemes[selectedSoul];
+      
+      document.getElementById('cardHeader').style.backgroundColor = selectedColor;
+      document.querySelectorAll('.dynamic-color').forEach(el => el.style.color = selectedColor);
+      document.getElementById('soulDisplay').textContent = selectedSoul;
+      
+      currentSoul = selectedSoul;
+      currentColor = selectedColor;
+    }
 
     async function runFullAudit() {
       let handle = document.getElementById('handle').value.trim().replace('@', '');
@@ -206,7 +236,7 @@
       const loadingEl = document.getElementById('loading');
       loadingEl.style.display = 'block';
 
-try {
+      try {
     const profileResp = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${handle}`);
     
     if (!profileResp.ok) {
@@ -215,48 +245,95 @@ try {
     }
 
     const profile = await profileResp.json();
-    if (!profile || !profile.did) return;
+    
+	currentAvatarUrl = profile.avatar;
+	
+    if (!profile || !profile.did) {
+        if (loadingEl) loadingEl.textContent = "❌ Error: Invalid profile data.";
+        return;
+    }
 
     const did = profile.did;
     const created = new Date(profile.createdAt);
     const now = new Date();
+
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setDate(now.getDate() - 180); 
-    
+
     let allMediaCount = 0, replyCount = 0, ownPostsInScan = 0;
     let cursor = null;
     let reachedEndOfTimeframe = false;
-    
+
+    console.log("Scan on");
+    console.log("Aujourd'hui : " + now.toLocaleDateString());
+    console.log("Recherche jusqu'au : " + sixMonthsAgo.toLocaleDateString());
+
     while (!reachedEndOfTimeframe) {
           const url = `https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${did}&limit=100${cursor ? `&cursor=${cursor}` : ''}`;
           const resp = await fetch(url);
           const data = await resp.json();
+
           if (!data.feed || data.feed.length === 0) break;
+
+          console.log(`Analyse page ${data.feed.length} posts...`);
 
           for (const item of data.feed) {
             const p = item.post;
             const postDate = new Date(p.indexedAt);
-            if (postDate < sixMonthsAgo) continue;
-            
+
+            if (postDate < sixMonthsAgo) { 
+                continue; 
+            }
+
             if (p.author.did === did && !item.reason) {
                 ownPostsInScan++;
                 if (item.reply) replyCount++;
+
                 if (p.embed) {
                     const type = p.embed.$type || "";
                     let isOriginalMedia = false;
+                    let mediaUrl = `https://bsky.app/profile/${handle}/post/${p.uri.split('/').pop()}`;
+
                     if (type.includes('app.bsky.embed.images')) {
-                        isOriginalMedia = (p.embed.images || []).some(img => (img.image?.mimeType || "") !== 'image/gif');
+                        const images = p.embed.images || [];
+                        isOriginalMedia = images.some(img => {
+                            const alt = (img.alt || "").toUpperCase();
+                            return (img.image?.mimeType || "") !== 'image/gif' && alt !== 'GIF';
+                        });
+                        if (isOriginalMedia) console.log(`IMAGE: ${mediaUrl}`);
                     } 
-                    else if (type.includes('app.bsky.embed.video')) isOriginalMedia = true;
-                    else if (type.includes('app.bsky.embed.recordWithMedia')) isOriginalMedia = true;
-                    if (isOriginalMedia) allMediaCount++;
+                    else if (type.includes('app.bsky.embed.video')) {
+                        isOriginalMedia = true;
+                        console.log(`VIDEO: ${mediaUrl}`);
+                    }
+                    else if (type.includes('app.bsky.embed.recordWithMedia')) {
+                        const mediaType = p.embed.media?.$type || "";
+                        if (mediaType.includes('images') || mediaType.includes('video')) {
+                            isOriginalMedia = true;
+                            console.log(`QUOTE+MEDIA: ${mediaUrl}`);
+                        }
+                    }
+
+                    if (isOriginalMedia) {
+                        allMediaCount++;
+                    }
                 }
             }
         }
+
         if (data.cursor) {
             cursor = data.cursor;
-            if (new Date(data.feed[data.feed.length - 1].post.indexedAt) < sixMonthsAgo) reachedEndOfTimeframe = true;
-        } else break;
+            console.log("Page suivante...");
+
+            const lastPostInPage = new Date(data.feed[data.feed.length - 1].post.indexedAt);
+            if (lastPostInPage < sixMonthsAgo) {
+                console.log("Date limite fin de page. Scan terminé.");
+                reachedEndOfTimeframe = true;
+            }
+        } else {
+            break; 
+        }
+
         if (loadingEl) loadingEl.textContent = `Scanning: ${ownPostsInScan} posts...`;
     }
 
@@ -269,26 +346,20 @@ try {
         let netRatio = profile.followersCount / (profile.followsCount || 1);
 
         let soul;
-		if (imgPerWeek > 12 && dailyRate > 12) soul = "Dragons";
-		else if (dailyRate > 12 && replyRatio > 50) soul = "Phoenixes";
-		else if (dailyRate > 12 && replyRatio <= 50) soul = "Chimeras";
-		else if (netRatio > 1.8 && replyRatio > 65) soul = "Hydras";
-		else if (netRatio > 1.5 && dailyRate < 4) soul = "Griffins";
-		else if (imgPerWeek > 4 && dailyRate < 6) soul = "Unicorns";
-		else if (dailyRate < 1.2 && replyRatio < 35) soul = "Krakens";
-		else soul = "Pegasus";
+        if (imgPerWeek > 12 && dailyRate > 12) soul = "Dragons";
+        else if (dailyRate > 12 && replyRatio > 50) soul = "Phoenixes";
+        else if (dailyRate > 12 && replyRatio <= 50) soul = "Chimeras";
+        else if (netRatio > 1.8 && replyRatio > 65) soul = "Hydras";
+        else if (netRatio > 1.5 && dailyRate < 4) soul = "Griffins";
+        else if (imgPerWeek > 4 && dailyRate < 6) soul = "Unicorns";
+        else if (dailyRate < 1.2 && replyRatio < 35) soul = "Krakens";
+        else soul = "Pegasus";
 
-        const creatureThemes = {
-          "Dragons": "#e63946", "Hydras": "#2a9d8f", "Phoenixes": "#f4a261", 
-          "Unicorns": "#a29bfe", "Krakens": "#264653", "Griffins": "#d4af37", 
-          "The Chimera": "#6d597a", "Pegasus": "#0085ff"
-        };
-        currentColor = creatureThemes[soul];
-        currentSoul = soul;
         currentHandle = "@" + profile.handle;
-
-        document.getElementById('cardHeader').style.backgroundColor = currentColor;
-        document.querySelectorAll('.dynamic-color').forEach(el => el.style.color = currentColor);
+        
+        document.getElementById('creatureSelect').value = soul;
+        
+        updateUIFromSelect();
 
         document.getElementById('lblVisual').textContent = `Visual Impact (${timeframeLabel})`;
         document.getElementById('lblInteraction').textContent = `Engagement Style (${timeframeLabel})`;
@@ -314,7 +385,7 @@ try {
         else if (replyRatio > 40) { int = "The Retriever<br>Social and original mix."; intEmo = "🐕"; }
         else if (replyRatio > 15) { int = "The Eagle<br>Reply when necessary."; intEmo = "🦅"; }
         else if (replyRatio > 5) { int = "The Polar Bear<br>BEARly reply."; intEmo = "🐻‍❄️"; }
-		else { int = "The Ghost<br>Who?"; intEmo = "👻"; }
+        else { int = "The Ghost<br>Who?"; intEmo = "👻"; }
 
         let act, actEmo;
         if (dailyRate > 45) { act = "The Squirrel<br>Hyper-active energy."; actEmo = "🐿️"; }
@@ -330,7 +401,7 @@ try {
         if (ageMonths < 0) { ageYears--; ageMonths += 12; }
         let ageLabel, ageEmo;
         if (ageYears >= 5) { ageLabel = "The Dinosaur<br>Saw it all."; ageEmo = "🦖"; }
-		else if (ageYears >= 3) { ageLabel = "The Tortoise<br>Last through every era."; ageEmo = "🐢"; }
+        else if (ageYears >= 3) { ageLabel = "The Tortoise<br>Last through every era."; ageEmo = "🐢"; }
         else if (ageYears >= 2) { ageLabel = "The Old Wolf<br>Wise elder of the pack."; ageEmo = "🐺"; }
         else if (ageYears >= 1) { ageLabel = "The Swan<br>Graceful and solid presence."; ageEmo = "🦢"; }
         else if (((ageYears * 12) + ageMonths) >= 6) { ageLabel = "The Hen<br>Established inhabitant."; ageEmo = "🐔"; }
@@ -338,7 +409,6 @@ try {
 
         document.getElementById('displayDate').textContent = "Audit Date: " + now.toLocaleDateString();
         document.getElementById('displayHandle').textContent = currentHandle;
-        document.getElementById('soulDisplay').textContent = soul;
         document.getElementById('valProfile').innerHTML = net;
         document.getElementById('subProfile').textContent = `${profile.followersCount} followers / ${profile.followsCount} following`;
         document.getElementById('emoProfile').textContent = netEmo;
@@ -364,20 +434,62 @@ try {
 
     function saveCard() {
       const card = document.getElementById('auditCard');
-      const btns = [document.getElementById('dlBtn'), document.getElementById('dlBannerBtn')];
-      btns.forEach(b => b.style.display = 'none');
+      const footer = card.querySelector('.card-footer');
+      const oldFooterDisplay = footer.style.display;
+      footer.style.display = 'none';
+      
       const captureHeight = card.querySelector('.content').getBoundingClientRect().bottom - card.getBoundingClientRect().top;
       html2canvas(card, { scale: 3, backgroundColor: "#ffffff", height: captureHeight }).then(canvas => {
         const link = document.createElement('a');
         link.download = `BSKY_Audit_Card.png`;
         link.href = canvas.toDataURL();
         link.click();
-        btns.forEach(b => b.style.display = 'block');
+        footer.style.display = oldFooterDisplay;
       });
     }
 
+function saveAvatar() {
+  if (!currentAvatarUrl) { alert("Avatar not found."); return; }
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  
+  const proxiedUrl = `https://images.weserv.nl/?url=${encodeURIComponent(currentAvatarUrl)}&default=${encodeURIComponent(currentAvatarUrl)}`;
+  img.crossOrigin = "anonymous";
+  img.src = proxiedUrl;
+
+  img.onload = function() {
+    const size = Math.max(img.width, img.height) || 1024;
+    canvas.width = size;
+    canvas.height = size;
+    const radius = size / 2;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(radius, radius, radius, 0, 2 * Math.PI, false);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img, 0, 0, size, size);
+    ctx.restore();
+
+    const borderThickness = size * 0.025;
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = borderThickness;
+    ctx.beginPath();
+    ctx.arc(radius, radius, radius - (borderThickness / 2), 0, 2 * Math.PI, false);
+    ctx.stroke();
+
+    const link = document.createElement('a');
+    link.download = `BSKY_Avatar_${currentSoul}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+  img.onerror = function() { alert("Error loading profile picture."); };
+}
+
     function saveBanner() {
       const banner = document.getElementById('bannerTemplate');
+      
       document.getElementById('bHandle').textContent = currentHandle;
       document.getElementById('bSoul').textContent = currentSoul;
       
@@ -387,7 +499,7 @@ try {
 
       html2canvas(banner, { scale: 1, width: 1500, height: 500, useCORS: true }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `BSKY_Banner.png`;
+        link.download = `BSKY_Banner_${currentSoul}.png`;
         link.href = canvas.toDataURL();
         link.click();
         banner.style.display = 'none';
